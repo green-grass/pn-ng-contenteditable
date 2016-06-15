@@ -25,6 +25,7 @@
   ],
   "dependencies": {
     "angular": "~1.5.0",
-    "angular-sanitize": "~1.5.0"
+    "angular-sanitize": "~1.5.0",
+    "pn-jquery-cleanhtml": "~1.0.0"
   }
 }
