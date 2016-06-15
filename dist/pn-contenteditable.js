@@ -14,9 +14,6 @@
                 singleLine = angular.isDefined(attrs.singleLine),
                 noHtml = angular.isDefined(attrs.noHtml);
 
-            element.on('change', function () {
-                console.log('c');
-            });
             if (uncensored) {
                 element.on('paste' + DEFAULT_EVENT_NAMESPACE, function () {
                     var $this = $(this);
