@@ -1,0 +1,30 @@
+{
+  "name": "pn-ng-contenteditable",
+  "version": "1.0.0-rc1-1",
+  "description": "PhantomNet AngularJS contenteditable directive",
+  "main": "./dist/pn-contenteditable.js",
+  "authors": [
+    "Minh Nguyen <mnguyen284@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "PhantomNet",
+    "AngularJS",
+    "contenteditable"
+  ],
+  "moduleType": [
+    "globals"
+  ],
+  "homepage": "https://github.com/green-grass/pn-ng-contenteditable",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "~1.5.0",
+    "angular-sanitize": "~1.5.0"
+  }
+}
