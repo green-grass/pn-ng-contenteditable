@@ -6,27 +6,31 @@
 
     var TOOLBAR_TEMPLATE = '\
 <div>\
-    <button type="button" class="btn btn-xs btn-link" data-command="justifyleft"><span class="fa fa-align-left"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="justifycenter"><span class="fa fa-align-center"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="justifyright"><span class="fa fa-align-right"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="justifyfull"><span class="fa fa-align-justify"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="bold"><span class="fa fa-bold"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="italic"><span class="fa fa-italic"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="underline"><span class="fa fa-underline"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="createlink"><span class="fa fa-link"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="unlink"><span class="fa fa-unlink"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="insertImage"><span class="fa fa-photo"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="youtube" data-custom="true"><span class="fa fa-youtube"></span></button>\
-    <button type="button" class="btn btn-xs btn-link" data-command="removeformat"><span class="fa fa-eraser"></span></button>\
+    <div class="buttons">\
+        <button type="button" data-command="justifyleft">Align Left</button>\
+        <button type="button" data-command="justifycenter">Align Center</button>\
+        <button type="button" data-command="justifyright">Align Right</button>\
+        <button type="button" data-command="justifyfull">Align Justify</button>\
+        <button type="button" data-command="bold">Bold</button>\
+        <button type="button" data-command="italic">Italic</button>\
+        <button type="button" data-command="underline">Underline</button>\
+        <button type="button" data-command="createlink">Create Link</button>\
+        <button type="button" data-command="unlink">Unlink</button>\
+        <button type="button" data-command="insertImage">Insert Image</button>\
+        <button type="button" data-command="youtube" data-custom="true">Insert YouTube</button>\
+        <button type="button" data-command="removeformat">Remove Format</button>\
+        <button type="button" class="raw-editor-toggler">Show HTML</button>\
+    </div>\
+    <div class="raw-editor">\
+        &lt;HTML&gt;\
+        <textarea></textarea>\
+    </div>\
 </div>\
 ';
 
-    var YOUTUBE_TEMPLATE = '\
-<div class="video-wrapper">\
-    <div class="video-container">\
-        <iframe width=640" height="480" src="https://www.youtube.com/embed/{src}" frameborder="0" allowfullscreen></iframe>\
-    </div>\
-</div>';
+    var IMAGE_TEMPLATE = '<img src="{src}" />';
+
+    var YOUTUBE_TEMPLATE = '<iframe width=640" height="480" src="https://www.youtube.com/embed/{src}" frameborder="0" allowfullscreen></iframe>';
 
     var module = angular.module('pnContenteditable', []);
 
@@ -37,7 +41,8 @@
                 uncensored = angular.isDefined(attrs.uncensored),
                 singleLine = angular.isDefined(attrs.singleLine),
                 noHtml = angular.isDefined(attrs.noHtml),
-                hasToolbar = angular.isDefined(attrs.hasToolbar);
+                hasToolbar = angular.isDefined(attrs.hasToolbar),
+                rawEditor, rawEditorInput;
 
             // Disable image resize
             document.execCommand('enableObjectResizing', false, false);
@@ -90,8 +95,12 @@
                                }, event.type === 'paste' ? 10 : 0);
                            });
             } else if (hasToolbar) {
-                var toolbar = $(TOOLBAR_TEMPLATE),
-                    buttons = $('button', toolbar);
+                var toolbar = $((scope.toolbarTemplate() || TOOLBAR_TEMPLATE)),
+                    buttons = $('.buttons button[data-command]', toolbar),
+                    rawEditorToggler = $('.buttons .raw-editor-toggler', toolbar);
+
+                rawEditor = $('.raw-editor', toolbar).hide();
+                rawEditorInput = $('textarea', rawEditor);
 
                 element
                     .on('focus' + DEFAULT_EVENT_NAMESPACE, function () {
@@ -143,8 +152,8 @@
                             case 'insertImage':
                                 var src = window.prompt('URL:', 'http://');
                                 if (src) {
-                                    document.execCommand(command, false, src);
-                                    $('img', element).addClass('img-responsive');
+                                    var html = (scope.imageTemplate() || IMAGE_TEMPLATE).replace('{src}', src);
+                                    pasteHtmlAtCaret(html, false);
                                 }
                                 break;
 
@@ -153,7 +162,7 @@
                                 if (src) {
                                     src = src.substr(src.lastIndexOf('=') + 1);
                                     src = src.substr(src.lastIndexOf('/') + 1);
-                                    var html = YOUTUBE_TEMPLATE.replace('{src}', src);
+                                    var html = (scope.youtubeTemplate() || YOUTUBE_TEMPLATE).replace('{src}', src);
                                     pasteHtmlAtCaret(html, false);
                                 }
                                 break;
@@ -162,13 +171,33 @@
                                 document.execCommand(command, false, null);
                         }
                     });
+
+                rawEditorToggler.on('click' + DEFAULT_EVENT_NAMESPACE, function (event) {
+                    event.preventDefault();
+                    rawEditor.animate({
+                        opacity: 'toggle',
+                        height: 'toggle'
+                    }, 'fast');
+                });
+
+                rawEditorInput.on('blur' + DEFAULT_EVENT_NAMESPACE, function () {
+                    var html = $(this).val();
+                    if (html !== ngModel.$viewValue) {
+                        ngModel.$setViewValue(html);
+                        ngModel.$render();
+                    }
+                });
             }
 
             if (!ngModel) return; // do nothing if no ng-model
 
             // Specify how UI should be updated
             ngModel.$render = function () {
-                element.html(uncensored ? (ngModel.$viewValue || '') : $sce.getTrustedHtml(ngModel.$viewValue || ''));
+                var html = uncensored ? (ngModel.$viewValue || '') : $sce.getTrustedHtml(ngModel.$viewValue || '');
+                element.html(html);
+                if (rawEditorInput) {
+                    rawEditorInput.val(html);
+                }
             };
             if (!preserve) {
                 ngModel.$render(); // initialize
@@ -194,12 +223,18 @@
                     html = '';
                 }
                 ngModel.$setViewValue(html);
+                rawEditorInput.val(html);
             }
         };
 
         return {
             restrict: 'A',
             require: '?ngModel',
+            scope: {
+                toolbarTemplate: '&',
+                imageTemplate: '&',
+                youtubeTemplate: '&'
+            },
             link: link
         };
     }]);
