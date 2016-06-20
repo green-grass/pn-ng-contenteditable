@@ -223,7 +223,9 @@
                     html = '';
                 }
                 ngModel.$setViewValue(html);
-                rawEditorInput.val(html);
+                if (rawEditorInput) {
+                    rawEditorInput.val(html);
+                }
             }
         };
 
