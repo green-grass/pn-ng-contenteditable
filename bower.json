@@ -1,6 +1,6 @@
 {
   "name": "pn-ng-contenteditable",
-  "version": "1.0.0-rc1-9",
+  "version": "1.0.0-rc1-10",
   "description": "PhantomNet AngularJS contenteditable directive",
   "main": "./dist/pn-contenteditable.js",
   "authors": [
@@ -24,9 +24,9 @@
     "tests"
   ],
   "dependencies": {
-    "angular-sanitize": "~1.5.0",
-    "pn-jquery-utilities": "~1.0.0",
-    "pn-jquery-cleanhtml": "~1.0.0",
-    "font-awesome": "~4.6.3"
+    "angular-sanitize": ">= 1.5.0",
+    "pn-jquery-utilities": ">= 1.0.0",
+    "pn-jquery-cleanhtml": ">= 1.0.0",
+    "font-awesome": ">= 4.6.3"
   }
 }
