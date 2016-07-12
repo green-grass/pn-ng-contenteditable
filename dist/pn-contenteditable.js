@@ -196,7 +196,8 @@
                 var html = uncensored ? (ngModel.$viewValue || '') : $sce.getTrustedHtml(ngModel.$viewValue || '');
                 element.html(html);
                 if (rawEditorInput) {
-                    rawEditorInput.val(html);
+                    // html has been encoded, use element.html() to get readable text
+                    rawEditorInput.val(element.html());
                 }
             };
             if (!preserve) {
