@@ -1,6 +1,6 @@
 {
   "name": "pn-ng-contenteditable",
-  "version": "1.0.0-rc1-12",
+  "version": "1.0.0-rc1-13",
   "description": "PhantomNet AngularJS contenteditable directive",
   "main": "./dist/pn-contenteditable.js",
   "authors": [

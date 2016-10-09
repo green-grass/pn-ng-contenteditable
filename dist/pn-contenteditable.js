@@ -70,10 +70,8 @@
                             window.setTimeout(function () {
                                 var tags = ['font', 'span', 'b', 'i', 'u', 'strong', 'em'],
                                     content = $this.html();
-                                if (!ignoreBr && content === '<br>') {
-                                    tags.push('br');
-                                }
                                 $this.cleanhtml('filterTags', { tags: tags });
+                                $this.append('<br>');
                                 $this.change();
                             }, event.type === 'paste' ? 10 : 0);
                         });
@@ -222,6 +220,9 @@
                 // If strip-br attribute is provided then we strip this out
                 if (!ignoreBr && html === '<br>') {
                     html = '';
+                }
+                if (singleLine && html.indexOf('<br>', html.length - '<br>'.length) !== -1) {
+                    html = html.substr(0, html.length - '<br>'.length);
                 }
                 ngModel.$setViewValue(html);
                 if (rawEditorInput) {
