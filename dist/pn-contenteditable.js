@@ -215,16 +215,20 @@
 
             // Write data to the model
             function read() {
-                var html = element.html();
+                var html = (singleLine && noHtml) ? element.text() : element.html();
+
                 // When we clear the content editable the browser leaves a <br> behind
                 // If strip-br attribute is provided then we strip this out
                 if (!ignoreBr && html === '<br>') {
                     html = '';
                 }
+
                 if (singleLine && html.indexOf('<br>', html.length - '<br>'.length) !== -1) {
                     html = html.substr(0, html.length - '<br>'.length);
                 }
+
                 ngModel.$setViewValue(html);
+
                 if (rawEditorInput) {
                     rawEditorInput.val(html);
                 }
