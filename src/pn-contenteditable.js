@@ -36,7 +36,9 @@
 
     module.directive('contenteditable', ['$sce', function ($sce) {
         var link = function (scope, element, attrs, ngModel) {
-            var preserve = angular.isDefined(attrs.preserve),
+            var hasPlaceholder = angular.isDefined(attrs.placeholder),
+                placeholder = attrs.placeholder,
+                preserve = angular.isDefined(attrs.preserve),
                 ignoreBr = angular.isDefined(attrs.ignoreBr),
                 uncensored = angular.isDefined(attrs.uncensored),
                 singleLine = angular.isDefined(attrs.singleLine),
@@ -207,13 +209,44 @@
                        ' keyup' + DEFAULT_EVENT_NAMESPACE +
                        ' change' + DEFAULT_EVENT_NAMESPACE,
                        function () {
-                           scope.$evalAsync(read);
+                           scope.$evalAsync(updateModel);
+                           updatePlaceholder();
                        });
             if (preserve) {
-                read(); // initialize
+                updateModel(); // initialize
             }
 
+            element.on('keydown' + DEFAULT_EVENT_NAMESPACE, function () {
+                element.removeAttr('data-active-placeholder');
+            });
+
+            updatePlaceholder();
+
             // Write data to the model
+            function updateModel() {
+                var html = read();
+
+                ngModel.$setViewValue(html);
+
+                if (rawEditorInput) {
+                    rawEditorInput.val(html);
+                }
+            }
+
+            function updatePlaceholder() {
+                if (!hasPlaceholder) {
+                    return;
+                }
+
+                var html = read();
+
+                if (html === '') {
+                    element.attr('data-active-placeholder', placeholder);
+                } else {
+                    element.removeAttr('data-active-placeholder');
+                }
+            }
+
             function read() {
                 var html = (singleLine && noHtml) ? element.text() : element.html();
 
@@ -227,11 +260,7 @@
                     html = html.substr(0, html.length - '<br>'.length);
                 }
 
-                ngModel.$setViewValue(html);
-
-                if (rawEditorInput) {
-                    rawEditorInput.val(html);
-                }
+                return html;
             }
         };
 
